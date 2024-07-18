@@ -39,7 +39,7 @@ Indices and tables
 * :ref:`search`
 
 .. _Product/Sphinx Docs: http://jenkins-test.photoneo.com/job/Product/job/Sphinx%20Docs/
-.. _photoneo/production#699: https://github.com/photoneo/production/pull/699/
+.. _photoneo/sphinx_doc#1: https://github.com/photoneo/sphinx_doc/pull/1
 .. _reStructuredText: https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
 .. _Sphinx docs: https://www.sphinx-doc.org/en/master/index.html
 .. _sphinx-themes.org: https://sphinx-themes.org/#themes
