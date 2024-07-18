@@ -1,0 +1,80 @@
+#!/bin/groovy
+
+pipeline {
+    agent { label 'photoneo-sir22' }
+    parameters {
+        string(
+            name: 'what',
+            defaultValue: 'jira-PT-661-sphinx-docs',
+            description: 'What to build.',
+            trim: true
+        )
+        booleanParam(
+            name: 'clean',
+            defaultValue: false,
+            description: 'Clean up the `.venv` directory before running the build.'
+        )
+    }
+    options {
+        timestamps()
+        ansiColor('xterm')
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout(
+                    [
+                        $class: 'GitSCM',
+                        branches: [[name: "${params.what}"]],
+                        browser: [
+                            $class: 'GithubWeb',
+                            repoUrl: 'https://github.com/photoneo/production'
+                        ],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        submoduleCfg: [],
+                        userRemoteConfigs:
+                        [
+                            [
+                                credentialsId: 'peterko_ssh_github_jenkinstest',
+                                url: 'git@github.com:photoneo/production.git'
+                            ]
+                        ]
+                    ]
+                )
+            }
+        }
+        stage('Clean') {
+            when {
+                expression { return "${params.clean}" ==~ /(?i)(Y|YES|T|TRUE|ON|RUN)/ }
+            }
+            steps {
+                sh "rm -rf .venv"
+            }
+        }
+        stage('Render') {
+            steps {
+                sh """
+                    rm -rf phosphinxdocs/build
+                    ci/production-pr.sh phosphinxdocs false true
+                    cd phosphinxdocs || exit 1
+                    . .venv/bin/activate
+                    sphinx-build -b html source/ build/
+                """
+            }
+            post {
+                always {
+                    zip archive: true, dir: 'phosphinxdocs/build', exclude: '', glob: '', overwrite: true, zipFile: "sphinx-docs-${env.BUILD_ID}.zip"
+                    publishHTML([
+                                        allowMissing: true,
+                                        alwaysLinkToLastBuild: true,
+                                        keepAll: true,
+                                        reportDir: "phosphinxdocs/build",
+                                        reportFiles: "index.html",
+                                        reportName: "Sphinx Docs"
+                                   ])
+                }
+            }
+        }
+    }
+}
