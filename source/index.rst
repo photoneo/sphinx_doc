@@ -7,7 +7,6 @@ Welcome to Photoneo Docs!
 =================================================
 
 * Jenkins Job is called `Product/Sphinx Docs`_.
-* GitHub PR is `photoneo/sphinx_doc#1`_.
 
 Read about `reStructuredText`_ on official `Sphinx docs`_. Choose a theme from `sphinx-themes.org`_.
 

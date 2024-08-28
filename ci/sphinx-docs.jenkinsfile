@@ -4,7 +4,7 @@ pipeline {
     parameters {
         string(
             name: 'what',
-            defaultValue: 'jira-PT-661-sphinx-docs',
+            defaultValue: 'master',
             description: 'What to build.',
             trim: true
         )

@@ -21,9 +21,10 @@ If you want to generate documentation files from source locally:
 - Run script `sphinx-build -b html source/ build/`.
 - Output docs will be stored in `/build` folder.
 
+    python -m pip install poetry==1.8.3
     python -m venv .venv
-    source ~/.venv/bin/activate
-    pip install --upgrade pip && pip install poetry && poetry install
+    source ~/.venv/*/activate
+    poetry install
     sphinx-build -b html source/ build/
 
 
