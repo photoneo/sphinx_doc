@@ -1,0 +1,3 @@
+[repositories]
+[repositories.production]
+url = "http://nexus.photoneo.com/repository/production/"

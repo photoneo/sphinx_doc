@@ -1,0 +1,70 @@
+#!/bin/groovy
+
+pipeline {
+    parameters {
+        string(
+            name: 'what',
+            defaultValue: 'master',
+            description: 'What to build.',
+            trim: true
+        )
+        booleanParam(
+            name: 'clean',
+            defaultValue: false,
+            description: 'Clean up the `.venv` directory before running the build.'
+        )
+        string(
+            name: 'agent',
+            defaultValue: 'photoneo-sir22',
+            description: 'Which agent to use.'
+        )
+    }
+    options {
+        timestamps()
+        ansiColor('xterm')
+    }
+    agent { label params.agent }
+    stages {
+        stage('Clean') {
+            when {
+                expression { return "${params.clean}" ==~ /(?i)(Y|YES|T|TRUE|ON|RUN)/ }
+            }
+            steps {
+                sh "rm -rf .venv"
+            }
+        }
+        stage('Render') {
+            steps {
+                script {
+                    if(isUnix()) {
+                        python_interpreter = "/usr/bin/python3"
+                    } else {
+                        python_interpreter = "py"
+                    }
+                }
+                sh """
+                    rm -rf ./build
+                    $python_interpreter -m pip install poetry==1.8.3
+                    $python_interpreter -m venv .venv
+                    . .venv/bin/activate
+                    $python_interpreter -m poetry install
+                    sphinx-build -b html source/ build/
+                """
+            }
+        }
+    }
+    post {
+        always {
+            zip archive: true, dir: 'build', exclude: '', glob: '', overwrite: true, zipFile: "sphinx-docs-${env.BUILD_ID}.zip"
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: "build",
+                reportFiles: "index.html",
+                reportName: "Sphinx Docs"
+            ])
+            phoSh("rm -rf \"sphinx-docs-${env.BUILD_ID}.zip\"")
+        }
+    }
+}

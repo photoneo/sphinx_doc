@@ -1,0 +1,69 @@
+[tool.poetry]
+name = "phosphinxdocs"
+version = "1.0.0"
+description = ""
+authors = ["Jakub Toma <toma@photoneo.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+myst-parser = "1.0.0"
+python = "^3.9"
+sphinx = "^6.2.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+flake8-pyproject = "^1.2.3"
+isort = "^5.12.0"
+mypy = "^1.2.0"
+pylint = "^2.17.3"
+pytest = "^7.3.1"
+pytest-cov = "^4.0.0"
+
+[[tool.poetry.source]]
+name = "production"
+url = "http://nexus.photoneo.com/repository/pypi-pho/simple"
+default = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "sphinx.*"
+]
+ignore_missing_imports = true
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+    "invalid-name",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-module-docstring"
+]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203"]
+per-file-ignores = ["__init__.py:F401"]
+exclude = [
+    ".venv",
+]
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
