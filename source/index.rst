@@ -7,7 +7,7 @@ Welcome to Photoneo Docs!
 =================================================
 
 * Jenkins Job is called `Product/Sphinx Docs`_.
-* GitHub PR is `photoneo/production#699`_.
+* GitHub PR is `photoneo/sphinx_doc#1`_.
 
 Read about `reStructuredText`_ on official `Sphinx docs`_. Choose a theme from `sphinx-themes.org`_.
 
@@ -15,9 +15,10 @@ To build manually, install Python and run the following commands (if you are on 
 use Git Bash)::
 
     # initial setup
+    python -m pip install poetry==1.8.3
     python -m venv .venv
     source ~/.venv/*/activate
-    pip install --upgrade pip && pip install poetry && poetry install
+    poetry install
 
     # rebuild after changing documentation files
     sphinx-build -b html source/ build/

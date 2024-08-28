@@ -1,7 +1,6 @@
 #!/bin/groovy
 
 pipeline {
-    agent { label 'photoneo-sir22' }
     parameters {
         string(
             name: 'what',
@@ -14,36 +13,18 @@ pipeline {
             defaultValue: false,
             description: 'Clean up the `.venv` directory before running the build.'
         )
+        string(
+            name: 'agent',
+            defaultValue: 'photoneo-sir22',
+            description: 'Which agent to use.'
+        )
     }
     options {
         timestamps()
         ansiColor('xterm')
     }
+    agent { label params.agent }
     stages {
-        stage('Checkout') {
-            steps {
-                checkout(
-                    [
-                        $class: 'GitSCM',
-                        branches: [[name: "${params.what}"]],
-                        browser: [
-                            $class: 'GithubWeb',
-                            repoUrl: 'https://github.com/photoneo/production'
-                        ],
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        submoduleCfg: [],
-                        userRemoteConfigs:
-                        [
-                            [
-                                credentialsId: 'peterko_ssh_github_jenkinstest',
-                                url: 'git@github.com:photoneo/production.git'
-                            ]
-                        ]
-                    ]
-                )
-            }
-        }
         stage('Clean') {
             when {
                 expression { return "${params.clean}" ==~ /(?i)(Y|YES|T|TRUE|ON|RUN)/ }
@@ -54,27 +35,36 @@ pipeline {
         }
         stage('Render') {
             steps {
+                script {
+                    if(isUnix()) {
+                        python_interpreter = "/usr/bin/python3"
+                    } else {
+                        python_interpreter = "py"
+                    }
+                }
                 sh """
-                    rm -rf phosphinxdocs/build
-                    ci/production-pr.sh phosphinxdocs false true
-                    cd phosphinxdocs || exit 1
+                    rm -rf ./build
+                    $python_interpreter -m pip install poetry==1.8.3
+                    $python_interpreter -m venv .venv
                     . .venv/bin/activate
+                    $python_interpreter -m poetry install
                     sphinx-build -b html source/ build/
                 """
             }
-            post {
-                always {
-                    zip archive: true, dir: 'phosphinxdocs/build', exclude: '', glob: '', overwrite: true, zipFile: "sphinx-docs-${env.BUILD_ID}.zip"
-                    publishHTML([
-                                        allowMissing: true,
-                                        alwaysLinkToLastBuild: true,
-                                        keepAll: true,
-                                        reportDir: "phosphinxdocs/build",
-                                        reportFiles: "index.html",
-                                        reportName: "Sphinx Docs"
-                                   ])
-                }
-            }
+        }
+    }
+    post {
+        always {
+            zip archive: true, dir: 'build', exclude: '', glob: '', overwrite: true, zipFile: "sphinx-docs-${env.BUILD_ID}.zip"
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: "build",
+                reportFiles: "index.html",
+                reportName: "Sphinx Docs"
+            ])
+            phoSh("rm -rf \"sphinx-docs-${env.BUILD_ID}.zip\"")
         }
     }
 }
