@@ -26,11 +26,11 @@ extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx_rtd_theme',
-'sphinx.ext.autosummary',
-'sphinx_tabs.tabs',
-'sphinx_panels',
-'sphinxcontrib.youtube',
-'sphinx_copybutton',]
+    'sphinx.ext.autosummary',
+    'sphinx_tabs.tabs',
+    'sphinx_panels',
+    'sphinxcontrib.youtube',
+    'sphinx_copybutton',]
 
 html_theme = 'sphinx_rtd_theme'
 
